@@ -1,8 +1,34 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { PROFILE } from '../data/profile';
+import { PAPERS } from '../data/papers';
+import type { Paper } from '../data/papers';
+import { TOOL_LINKS } from '../data/tools';
+import { getPhotoCollections } from '../utils/photos';
+
+const formatVenueType = (type: Paper['venueType']) =>
+	type ? type.charAt(0).toUpperCase() + type.slice(1) : '';
+
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 3);
+
+const collections = getPhotoCollections();
+const previewPhotos = collections
+	.flatMap((collection) =>
+		collection.items.slice(0, 2).map((item) => ({
+			...item,
+			tag: collection.tag,
+		})),
+	)
+	.slice(0, 6);
+
+const totalPhotos = collections.reduce((acc, collection) => acc + collection.items.length, 0);
 ---
 
 <!doctype html>
@@ -13,37 +39,351 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<div class="container">
+				<section class="hero card">
+					<div class="hero-intro">
+						<span class="chip">Welcome aboard</span>
+						<h1>Hi, I&apos;m {PROFILE.name}</h1>
+						<p>{PROFILE.tagline}</p>
+						<p>
+							I explore AI, embodied intelligence, and human-computer collaboration while documenting the world
+							through photography. This digital garden gathers my research notes, side projects, and tools I
+							maintain.
+						</p>
+						<div class="hero-actions">
+							<a class="button" href="/photography">View photo journal</a>
+							<a class="button secondary" href="/blog">Read the blog</a>
+						</div>
+					</div>
+					<ul class="hero-meta">
+						<li>
+							<span class="label">Base</span>
+							<span>{PROFILE.location}</span>
+						</li>
+						<li>
+							<span class="label">Contact</span>
+							<a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
+						</li>
+						<li>
+							<span class="label">Social</span>
+							<div class="social-tags">
+								{
+									PROFILE.socials.map((item) => (
+										<a href={item.href} target="_blank" class="chip">{item.name}</a>
+									))
+								}
+							</div>
+						</li>
+					</ul>
+				</section>
+
+				<section id="about">
+					<div class="section-header">
+						<span class="chip">About</span>
+						<h2>A journey through research and making</h2>
+						<p class="muted">Keywords that shape my days: AI, information access, and creative expression.</p>
+					</div>
+					<div class="card bio-card">
+						<ul>
+							{PROFILE.bio.map((line) => (
+								<li>{line}</li>
+							))}
+						</ul>
+					</div>
+				</section>
+
+				<section id="papers">
+					<div class="section-header">
+						<span class="chip">Papers & projects</span>
+						<h2>Recent highlights</h2>
+						<p class="muted">Select research efforts I worked on or keep tracking—always open to conversations.</p>
+					</div>
+					<div class="grid columns-2">
+						{PAPERS.map((paper) => (
+							<article class="card paper-card">
+								<div class="paper-meta">
+									<span class="chip">{paper.year}</span>
+									<span class="muted">
+										{paper.venue}
+										{paper.venueType && ` · ${formatVenueType(paper.venueType)}`}
+									</span>
+								</div>
+								<h3>{paper.title}</h3>
+								<p>{paper.summary}</p>
+								{paper.links && paper.links.length > 0 && (
+									<div class="paper-links">
+										{paper.links.map((link) => (
+											<a href={link.href} target="_blank">{link.label}</a>
+										))}
+									</div>
+								)}
+							</article>
+						))}
+					</div>
+				</section>
+
+				<section id="photography">
+					<div class="section-header">
+						<span class="chip">Photography</span>
+						<h2>Featured shots · {collections.length} tags · {totalPhotos} photos</h2>
+						<p class="muted">Drop images into tagged folders and everything renders automatically.</p>
+					</div>
+					{previewPhotos.length > 0 ? (
+						<div class="photo-grid">
+							{previewPhotos.map((photo) => (
+								<figure class="photo-card">
+									<img src={photo.src} alt={`${photo.tag} - ${photo.filename}`} loading="lazy" />
+									<figcaption>
+										<span class="chip">{photo.tag}</span>
+									</figcaption>
+								</figure>
+							))}
+						</div>
+					) : (
+						<div class="card empty-state">
+							<h3>No photos yet</h3>
+							<p>
+								Create folders under <code>public/photography/</code>, e.g. <code>public/photography/street/</code>,
+								and upload images to make them appear here.
+							</p>
+						</div>
+					)}
+					<div class="section-actions">
+						<a class="button secondary" href="/photography">Browse full gallery</a>
+					</div>
+				</section>
+
+				<section id="blog">
+					<div class="section-header">
+						<span class="chip">Blog</span>
+						<h2>Latest posts</h2>
+						<p class="muted">Write in Markdown/MDX under <code>src/content/blog/</code> and commit to publish.</p>
+					</div>
+					{posts.length > 0 ? (
+						<div class="grid columns-3">
+							{posts.map((post) => (
+								<article class="card post-card">
+									<h3>{post.data.title}</h3>
+									<p class="muted">
+										<FormattedDate date={post.data.pubDate} />
+									</p>
+									<p>{post.data.description}</p>
+									<a class="button secondary" href={`/blog/${post.id}/`}>Read more</a>
+								</article>
+							))}
+						</div>
+					) : (
+						<div class="card empty-state">
+							<h3>No posts yet</h3>
+							<p>Copy <code>src/content/blog/first-post.md</code> to craft the first entry.</p>
+						</div>
+					)}
+				</section>
+
+				<section id="tools">
+					<div class="section-header">
+						<span class="chip">Tools</span>
+						<h2>Personal toolbox</h2>
+						<p class="muted">Auxiliary utilities that boost my info intake and research workflow.</p>
+					</div>
+					<div class="grid columns-2">
+						{TOOL_LINKS.map((tool) => (
+							<a class="card tool-card" href={tool.href} target="_blank">
+								<div class="tool-icon">↗</div>
+								<h3>{tool.name}</h3>
+								<p>{tool.description}</p>
+							</a>
+						))}
+					</div>
+				</section>
+
+				<section class="cta card">
+					<h2>Let&apos;s talk</h2>
+					<p>
+						If my research focus, photography stories, or mini tools resonate with you, feel free to email me or
+						open an issue / PR on GitHub. I&apos;m always up for collaborating on new ideas.
+					</p>
+					<a class="button" href={`mailto:${PROFILE.email}`}>Send me an email</a>
+				</section>
+			</div>
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	.hero {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 3.2rem;
+		padding: 4rem;
+		margin-bottom: 6rem;
+	}
+
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.2rem;
+		margin-top: 2rem;
+	}
+
+	.hero-meta {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: grid;
+		gap: 1.6rem;
+	}
+
+	.hero-meta li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		background: rgba(79, 70, 229, 0.06);
+		padding: 1.2rem 1.6rem;
+		border-radius: var(--radius-md);
+	}
+
+	.hero-meta .label {
+		font-size: 1.3rem;
+		color: var(--text-tertiary);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+	}
+
+	.social-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.8rem;
+	}
+
+	.bio-card ul {
+		margin: 0;
+		padding-left: 1.4rem;
+		display: grid;
+		gap: 0.8rem;
+	}
+
+	.bio-card li {
+		color: var(--text-secondary);
+	}
+
+	.section-header {
+		display: flex;
+		flex-direction: column;
+		gap: 0.8rem;
+		margin-bottom: 2.4rem;
+	}
+
+	.paper-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1.2rem;
+	}
+
+	.paper-meta {
+		display: flex;
+		align-items: center;
+		gap: 1.2rem;
+	}
+
+	.paper-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.paper-links a {
+		font-weight: 600;
+		color: var(--accent);
+	}
+
+	.photo-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 2rem;
+	}
+
+	.photo-card {
+		background: var(--bg-surface);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-md);
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+
+	.photo-card img {
+		border-radius: 0;
+		aspect-ratio: 4 / 3;
+		object-fit: cover;
+		width: 100%;
+	}
+
+	.photo-card figcaption {
+		display: flex;
+		align-items: center;
+		padding: 1rem 1.4rem 1.4rem;
+	}
+
+	.section-actions {
+		margin-top: 2.4rem;
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.empty-state {
+		text-align: center;
+	}
+
+	.empty-state code {
+		font-size: 1.4rem;
+	}
+
+	.post-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.post-card .button {
+		align-self: flex-start;
+		margin-top: auto;
+	}
+
+	.tool-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1.2rem;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.tool-card .tool-icon {
+		font-size: 2.4rem;
+		color: var(--accent);
+	}
+
+	.cta {
+		text-align: center;
+		padding: 3.2rem 3.6rem;
+	}
+
+	.cta .button {
+		margin-top: 1.6rem;
+	}
+
+	@media (max-width: 720px) {
+		.hero {
+			padding: 3rem 2.4rem;
+		}
+
+		section {
+			margin-bottom: 4rem;
+		}
+
+		.section-actions {
+			justify-content: center;
+		}
+	}
+</style>

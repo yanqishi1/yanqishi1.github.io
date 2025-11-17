@@ -1,62 +1,99 @@
-# Astro Starter Kit: Blog
+# Zhonghan Qin’s Digital Garden
 
-```sh
-npm create astro@latest -- --template blog
-```
+Modern Astro 5 site that showcases research highlights, photography collections, custom tools, and a Markdown-native blog. Fully static and GitHub Pages friendly.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## ✨ Features
 
-Features:
+- Landing page with personal intro, paper highlights, photo preview, blog feed, and toolbox
+- Photography hub powered by folders-as-tags—drop images in `public/photography/<tag>/`
+- Content collections for Markdown/MDX posts plus RSS and sitemap
+- Data-driven profile/paper/tool sections via `src/data/`
+- Responsive layout with cohesive typography and glassmorphism accents
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+## 🚀 Getting Started
 
-## 🚀 Project Structure
+1. **Requirements**
+   - Node.js ≥ 20.3 (20 LTS recommended), npm ≥ 9.6
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+3. **Local development**
+   ```bash
+   npm run dev
+   ```
+   Visit `http://localhost:4321`
+4. **Production build**
+   ```bash
+   npm run build
+   ```
+   Output lands in `dist/` and can be deployed to GitHub Pages or any static host.
 
-Inside of your Astro project, you'll see the following folders and files:
+## 📁 Project Structure
 
 ```text
-├── public/
-├── src/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+public/
+  photography/     # folders = tags; place images here
+src/
+  components/      # shared UI such as header & footer
+  content/blog/    # Markdown/MDX blog posts
+  data/            # profile, papers, toolbox metadata
+  layouts/         # reusable layouts (blog post)
+  pages/           # route-level Astro files
+  styles/          # global styles
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 📝 Blogging Guide
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+1. Copy any sample inside `src/content/blog/` (e.g., `first-post.md`).
+2. Update frontmatter:
+   ```yaml
+   ---
+   title: Post title
+   description: Short summary
+   pubDate: 2025-11-17
+   updatedDate: 2025-11-20 # optional
+   heroImage: ../../assets/cover.jpg # optional
+   ---
+   ```
+3. Write the body in Markdown/MDX. Save + commit to publish.
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+## 📷 Managing Photography
 
-Any static assets, like images, can be placed in the `public/` directory.
+1. Create a folder under `public/photography/`—the folder name becomes the tag.
+2. Add images (`jpg`, `jpeg`, `png`, `webp`, `gif`, `avif`) to that folder.
+3. Rebuild or refresh; the gallery and filters update automatically.
 
-## 🧞 Commands
+Example:
+```
+public/photography/
+  street/
+    shanghai-night.jpg
+  nature/
+    yunnan-lake.webp
+```
 
-All commands are run from the root of the project, from a terminal:
+## 🔧 Data Configuration
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+- Profile: `src/data/profile.ts`
+- Papers: `src/data/papers.ts`
+- Tools: `src/data/tools.ts`
 
-## 👀 Want to learn more?
+Edit these TypeScript objects to refresh content globally.
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 🚢 Deploying
 
-## Credit
+1. Run `npm run build`.
+2. Deploy the contents of `dist/` to GitHub Pages (e.g., via `gh-pages` branch or GitHub Actions).
+3. Optional preview:
+   ```bash
+   npm run preview
+   ```
 
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+## ❓ FAQ
+
+- **Build fails about Node version** → upgrade Node.js to ≥ 20.3.
+- **Photography page is empty** → ensure at least one folder with supported image files exists in `public/photography/`.
+- **Blog post missing** → verify frontmatter `pubDate` is a valid date string.
+
+Feel free to fork, customize, and share your own digital garden! 🚀

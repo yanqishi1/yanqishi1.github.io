@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
@@ -15,100 +14,112 @@ const posts = (await getCollection('blog')).sort(
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
+		<BaseHead title={`${SITE_TITLE} · Blog`} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
 		<Header />
 		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
+			<div class="container">
+				<section class="hero card">
+					<div>
+						<span class="chip">Writing</span>
+						<h1>Blog · Thinking out loud</h1>
+						<p>
+							Research memos, learning notes, and reflections written in Markdown. Each post lives in
+							<code>src/content/blog/</code>; commit to publish.
+						</p>
+					</div>
+					<div class="card info-card">
+						<h3>Writing checklist</h3>
+						<ul>
+							<li>Set <code>title</code>, <code>description</code>, and <code>pubDate</code> in frontmatter.</li>
+							<li>Optional fields: <code>updatedDate</code> and <code>heroImage</code>.</li>
+							<li>MDX is enabled—drop in React/Vue components when needed.</li>
+						</ul>
+					</div>
+				</section>
+
+				<section>
+					{posts.length > 0 ? (
+						<div class="posts-grid">
+							{posts.map((post) => (
+								<article class="card post-card">
+									<div class="post-meta">
+										<span class="chip">
+											<FormattedDate date={post.data.pubDate} />
+										</span>
+										{post.data.updatedDate && (
+											<span class="muted">
+												Updated <FormattedDate date={post.data.updatedDate} />
+											</span>
+										)}
+									</div>
+									<h2>{post.data.title}</h2>
+									<p>{post.data.description}</p>
+									<a class="button secondary" href={`/blog/${post.id}/`}>Read more</a>
+								</article>
+							))}
+						</div>
+					) : (
+						<div class="card empty-state">
+							<h3>Nothing here yet</h3>
+							<p>
+								Start a new post by copying <code>src/content/blog/first-post.md</code>, tweak the metadata, and
+								save.
+							</p>
+						</div>
+					)}
+				</section>
+			</div>
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	.hero {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 2.4rem;
+		margin-bottom: 4rem;
+	}
+
+	.info-card {
+		background: var(--accent-soft);
+	}
+
+	.info-card ul {
+		margin: 1.6rem 0 0;
+		padding-left: 1.6rem;
+		display: grid;
+		gap: 0.6rem;
+	}
+
+	.posts-grid {
+		display: grid;
+		gap: 2.4rem;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	}
+
+	.post-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1.2rem;
+	}
+
+	.post-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.post-card .button {
+		align-self: flex-start;
+		margin-top: auto;
+	}
+
+	.empty-state {
+		text-align: center;
+	}
+</style>
